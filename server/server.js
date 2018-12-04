@@ -7,6 +7,6 @@ const app = express();
 
 app.use(express.static(publicPath))
 
-app.listen(3000, () => {
-    console.log(`Server start on ${port} 3000!`)
+app.listen(port, () => {
+    console.log(`Server start on ${port}!`)
 })
