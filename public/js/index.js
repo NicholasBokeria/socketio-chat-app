@@ -1,5 +1,21 @@
 let socket = io()
 
+function scrollToBottom() {
+    // Selectors
+    let messages = jQuery('#messages')
+    let newMessage = messages.children('li:last-child')
+    //Heights
+    let clientHeight = messages.prop('clientHeight')
+    let scrollTop = messages.prop('scrollTop')
+    let scrollHeight = messages.prop('scrollHeight')
+    let newMessageHeight = newMessage.innerHeight()
+    let lastMessageHeight = newMessage.prev().innerHeight()
+
+    if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+        messages.scrollTop(scrollHeight)
+    }
+}
+
 socket.on('connect', function () {
     console.log('Connected to server')
 })
@@ -11,7 +27,7 @@ socket.on('disconnect', function () {
 socket.on('newMessage', function (message) {
     let formatedTime = moment(message.createdAt).format('h:mm a')
     let template = jQuery('#message-template').html()
-    
+
     let html = Mustache.render(template, {
         text: message.text,
         from: message.from,
@@ -19,9 +35,10 @@ socket.on('newMessage', function (message) {
     })
 
     jQuery('#messages').append(html)
+    scrollToBottom()
 })
 
-socket.on('newLocationMessage', function(message) {
+socket.on('newLocationMessage', function (message) {
     let formatedTime = moment(message.createdAt).format('h:mm a')
     let template = jQuery('#location-template').html()
 
@@ -32,6 +49,7 @@ socket.on('newLocationMessage', function(message) {
     })
 
     jQuery('#messages').append(html)
+    scrollToBottom()
 })
 
 jQuery('#message-form').on('submit', function (event) {
@@ -41,7 +59,7 @@ jQuery('#message-form').on('submit', function (event) {
 
     socket.emit('createMessage', {
         from: 'User',
-        text : messageTextBox.val()
+        text: messageTextBox.val()
     }, function () {
         messageTextBox.val('')
     })
@@ -50,7 +68,7 @@ jQuery('#message-form').on('submit', function (event) {
 let locationButton = jQuery('#send-location')
 
 locationButton.on('click', function (event) {
-    if(!navigator.geolocation) {
+    if (!navigator.geolocation) {
         return alert('Geolocation not supported by your browser')
     }
 
